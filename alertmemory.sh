@@ -3,7 +3,7 @@
 #Script Name    :alertmemory.sh
 #Description    :send alert mail when server memory is running low
 #Args           :       
-#Author         :Aaron Kili Kisinga and Hand Medeiros an Guilherme Pontess
+#Author         :Aaron Kili Kisinga and Hand Medeiros and Guilherme Pontess
 #Email          :aaronkilik@gmail.com || handerson.medeiros@tembici.com
 #License       : GNU GPL-3	
 #######################################################################################
@@ -40,12 +40,17 @@ if [[ "$total_free" -le 15  ]]; then
 	fi
 
 	if [[ "$hDiff" -gt 60 ]]; then
-		ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head | ./send-email -ml addr_list -t "$subject"
-		#ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head | mail -s "$subject" handerson.medeiros@tembici.com
+		addr_list="addr_list"
+		while read email_to
+		    do ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head | mail -s "$subject" "$email_to"
+		done < addr_list
+
 	    rm last_moment_sended_email
-	    echo `date +%Y-%m-%d\ %H:%M:%S` >> last_moment_sended_email		
+	    echo `date +%Y-%m-%d\ %H:%M:%S` > last_moment_sended_email		
 	fi
 fi
+
+echo `date +%Y-%m-%d\ %H:%M:%S` > last_moment_verified
 
 exit 0
 
