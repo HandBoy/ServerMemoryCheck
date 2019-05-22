@@ -40,9 +40,18 @@ if [[ "$total_free" -le 15  ]]; then
 	fi
 
 	if [[ "$hDiff" -gt 60 ]]; then
+		echo "Send Email"
 		addr_list="addr_list"
-		while read email_to
-		    do ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head | mail -s "$subject" "$email_to"
+		while read email_to; do
+		    list_process=$(ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head)
+
+		    first_pid=$(awk 'NR==2{print $1}' <<< "$list_process")
+		    second_pid=$(awk 'NR==3{print $1}' <<< "$list_process")
+
+		    process_one=$(pmap $first_pid | awk 'NR==1{print $0}')
+		    process_two=$(pmap $second_pid | awk 'NR==1{print $0}')
+		    
+		    echo -e "$list_process \n\n ===== PROCESS DETAILS ===== \n # $process_one \n # $process_two " | mail -s "$subject" "$email_to"
 		done < addr_list
 
 	    rm last_moment_sended_email
